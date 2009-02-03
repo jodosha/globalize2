@@ -15,16 +15,27 @@ class DatabaseTest < ActiveSupport::TestCase
 
   test "should create translations" do
     I18n.backend.store_translations :en, { :hello => "Hello" }
-    assert_equal "Hello", translate(:hello)
+    assert_equal "Hello", I18n.translate(:hello)
   end
   
   test "should update translations" do
     I18n.backend.store_translations :en, { :foo => "Foo!" }
-    assert_equal "Foo!", translate(:foo)
+    assert_equal "Foo!", I18n.translate(:foo)
   end
   
-  private
-    def translate(key)
-      Globalize::Backend::Database::Translation.find_by_locale_and_key(I18n.locale, key, :limit => 1).text
+  test "returns an instance of Translation::Static" do
+    translation = I18n.translate :foo
+    assert_instance_of Globalize::Translation::Static, translation
+  end
+
+  test "returns error message for missing translation" do
+    message = I18n.translate :foz
+    assert_equal "translation missing: en, foz", message
+  end
+  
+  test "raise exception on missing translation" do
+    assert_raise I18n::MissingTranslationData do
+      I18n.translate :foz, :raise => true
     end
+  end
 end
