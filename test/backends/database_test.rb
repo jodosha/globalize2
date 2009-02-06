@@ -6,7 +6,8 @@ class DatabaseTest < ActiveSupport::TestCase
   def setup
     reset_db!
     I18n.backend = Globalize::Backend::Database.new
-    translations = { :en => { :foo => "Foo" } }
+    translations = { :en => { :foo => "Foo" },
+      :cz => { :bar => { :one => "one cz bar", :few => "few cz bar", :other => "other cz bar" } } }
     
     translations.each do |locale, data|
       I18n.backend.store_translations locale, data
@@ -17,7 +18,25 @@ class DatabaseTest < ActiveSupport::TestCase
     I18n.backend.store_translations :en, { :hello => "Hello" }
     assert_equal "Hello", I18n.translate(:hello)
   end
-  
+
+  test "should create pluralized translations" do
+    I18n.backend.store_translations :en, { :bar => { :one => "one bar", :other => "other bar" } }
+    assert_equal "one bar",   I18n.translate(:bar)
+    assert_equal "one bar",   I18n.translate(:bar, :count => 1)
+    assert_equal "other bar", I18n.translate(:bar, :count => 2)
+  end
+
+  test "returns custom pluralized results" do
+    # TODO investigate why with_locale doesn't work properly
+    I18n.locale = :cz
+    I18n.backend.add_pluralizer(:cz, cz_pluralizer)
+    assert_equal "one cz bar",   I18n.translate(:bar)
+    assert_equal "one cz bar",   I18n.translate(:bar, :count => 1)
+    assert_equal "few cz bar",   I18n.translate(:bar, :count => 3)
+    assert_equal "other cz bar", I18n.translate(:bar, :count => 5)
+    I18n.locale = :en
+  end
+
   test "should update translations" do
     I18n.backend.store_translations :en, { :foo => "Foo!" }
     assert_equal "Foo!", I18n.translate(:foo)
@@ -38,4 +57,9 @@ class DatabaseTest < ActiveSupport::TestCase
       I18n.translate :foz, :raise => true
     end
   end
+
+  private
+    def cz_pluralizer
+      lambda{|c| c == 1 ? :one : (2..4).include?(c) ? :few : :other }
+    end
 end

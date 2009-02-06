@@ -17,11 +17,11 @@ ActiveRecord::Schema.define do
   create_table :globalize_translations, :force => true do |t|
     t.string :key, :null => false
     t.string :locale, :null => false
-    # TODO pluralization index
+    t.string :pluralization_index, :null => false
     t.string :text
   end
   
-  # TODO add unique key for key and locale combination
-  add_index :globalize_translations, :key
+  # TODO enable index
+  # add_index :globalize_translations, [ :key, :locale, :pluralization_index ], :unique => true
 end
   
