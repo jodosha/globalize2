@@ -27,14 +27,12 @@ class DatabaseTest < ActiveSupport::TestCase
   end
 
   test "returns custom pluralized results" do
-    # TODO investigate why with_locale doesn't work properly
-    I18n.locale = :cz
-    I18n.backend.add_pluralizer(:cz, cz_pluralizer)
-    assert_equal "one cz bar",   I18n.translate(:bar)
-    assert_equal "one cz bar",   I18n.translate(:bar, :count => 1)
-    assert_equal "few cz bar",   I18n.translate(:bar, :count => 3)
-    assert_equal "other cz bar", I18n.translate(:bar, :count => 5)
-    I18n.locale = :en
+    with_locale :cz do
+      assert_equal "one cz bar",   I18n.translate(:bar)
+      assert_equal "one cz bar",   I18n.translate(:bar, :count => 1)
+      assert_equal "few cz bar",   I18n.translate(:bar, :count => 3)
+      assert_equal "other cz bar", I18n.translate(:bar, :count => 5)
+    end
   end
 
   test "should update translations" do
@@ -59,6 +57,18 @@ class DatabaseTest < ActiveSupport::TestCase
   end
 
   private
+    def with_locale(locale, &block)
+      begin
+        old_locale, I18n.locale = I18n.locale, locale
+        pluralizer = "#{locale}_pluralizer"
+        I18n.backend.add_pluralizer(locale, send(pluralizer)) if respond_to? pluralizer
+        yield
+      rescue Exception
+      ensure
+        I18n.locale = old_locale
+      end
+    end
+
     def cz_pluralizer
       lambda{|c| c == 1 ? :one : (2..4).include?(c) ? :few : :other }
     end
