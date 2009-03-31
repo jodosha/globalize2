@@ -33,6 +33,7 @@ module Globalize
           def create_or_update(locale, key, data)
             # TODO choose a default pluralization_index value
             data = { 'one' => data } if data.is_a? String
+            locale, key = locale.to_s, key.to_s
 
             data.each do |pluralization_index, text|
               if record = find_by_locale_and_key_and_pluralization_index(locale, key, pluralization_index)
@@ -44,7 +45,7 @@ module Globalize
           end
 
           def fetch(locale, key)
-            result = find_all_by_locale_and_key(locale, key, :select => ['pluralization_index, text'])
+            result = find_all_by_locale_and_key(locale.to_s, key.to_s, :select => ['pluralization_index, text'])
             return if result.empty?
 
             result.inject({}) do |result, record|
