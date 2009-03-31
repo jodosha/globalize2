@@ -13,6 +13,10 @@ module Globalize
         super
       end
 
+      def available_locales
+        Translation.find(:all, :select => "DISTINCT locale").map { |t| t.locale.to_sym }
+      end
+
       protected
         def lookup(locale, key, scope = [])
           # TODO find in the cache

@@ -14,6 +14,10 @@ class DatabaseTest < ActiveSupport::TestCase
     end
   end
 
+  test "available locales" do
+    assert_equal [:en, :cz], I18n.available_locales
+  end
+
   test "should create translations" do
     I18n.backend.store_translations :en, { :hello => "Hello" }
     assert_equal "Hello", I18n.translate(:hello)
