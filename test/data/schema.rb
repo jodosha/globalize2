@@ -24,6 +24,12 @@ ActiveRecord::Schema.define do
     t.text       :content
     t.string     :type
   end
-  
+
+  create_table :globalize_translations, :force => true do |t|
+    t.string :key, :null => false
+    t.string :locale, :null => false
+    t.string :pluralization_index, :null => false
+    t.string :text
+  end
 end
   

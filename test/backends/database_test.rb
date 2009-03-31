@@ -4,7 +4,7 @@ require 'globalize/translation'
 
 class DatabaseTest < ActiveSupport::TestCase
   def setup
-    reset_db!
+    reset_db! File.expand_path(File.join(File.dirname(__FILE__), '..', 'data', 'schema.rb'))
     I18n.backend = Globalize::Backend::Database.new
     translations = { :en => { :foo => "Foo" },
       :cz => { :bar => { :one => "one cz bar", :few => "few cz bar", :other => "other cz bar" } } }
